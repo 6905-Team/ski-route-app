@@ -18,19 +18,17 @@ function App() {
   const [showRoute, setShowRoute] = useState(false);
   const [routesFound, setRoutesFound] = useState({});
 
-  const generateRandomLocation = (exclude) => {
-    const availableLocations = locations.filter((loc) => loc.id !== exclude);
-    return availableLocations[Math.floor(Math.random() * availableLocations.length)].id;
-  };
-
-  const handleStartLocationClick = () => {
-    setStartLocation(generateRandomLocation(endLocation));
+  const handleLocationClick = (locationId) => {
+    if (!startLocation) {
+      setStartLocation(locationId);
+    } else if (!endLocation && locationId !== startLocation) {
+      setEndLocation(locationId);
+    } else {
+      setStartLocation(locationId);
+      setEndLocation(null);
+    }
     setShowRoute(false);
-  };
-
-  const handleEndLocationClick = () => {
-    setEndLocation(generateRandomLocation(startLocation));
-    setShowRoute(false);
+    setRouteMessage('');
   };
 
   const handleCalculateRouteClick = () => {
@@ -56,17 +54,9 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Coolest App Ever</h1>
+      <h1>Skier Routing App</h1>
       <img src={zzImage} alt="Cover" />
       <div className="button-container">
-        <div>
-          <button onClick={handleStartLocationClick}>Start Location</button>
-          {startLocation && <span>{startLocation}</span>}
-        </div>
-        <div>
-          <button onClick={handleEndLocationClick}>End Location</button>
-          {endLocation && <span>{endLocation}</span>}
-        </div>
         <select value={slopePreference} onChange={(e) => setSlopePreference(e.target.value)}>
           <option value="">Slope Preference</option>
           <option value="easy">Easy</option>
@@ -90,6 +80,7 @@ function App() {
               key={loc.id}
               data={[{ x: loc.x, y: loc.y }]}
               color={loc.id === startLocation || loc.id === endLocation ? 'orange' : 'gray'}
+              onValueClick={() => handleLocationClick(loc.id)}
             />
           ))}
           {showRoute && startLocation && endLocation && (
